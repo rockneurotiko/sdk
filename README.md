@@ -41,7 +41,7 @@ private $token = 'token';
 public function _incomingMessage($message_json) {
     $messageObj = json_decode($message_json, true);
     $messageData = $messageObj['message'];
-	
+
     $botan = new Botan($this->token);
     $botan->track($messageData, 'Start');
 }
@@ -57,7 +57,7 @@ Code:
 
 	import botan
 	token = 1
-	uid = 2    
+	uid = 2
 	messageDict = {}
 	print botan.track(token, uid, messageDict, 'Search')
 
@@ -99,6 +99,42 @@ fn main() {
 }
 ```
 
+## Go example
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/botanio/sdk/go"
+)
+
+type Message struct {
+	SomeMetric    int
+	AnotherMetric int
+}
+
+func main() {
+	ch := make(chan bool) // Channel for synchronization
+
+	bot := botan.New("1111")
+	message := Message{100, 500}
+
+	// Asynchronous track example
+	bot.TrackAsync(1, message, "Search", func(ans botan.Answer, err []error) {
+		fmt.Printf("Asynchonous: %+v\n", ans)
+		ch <- true // Synchronization send
+	})
+
+	// Synchronous track example
+	ans, _ := bot.Track(1, message, "Search")
+	fmt.Printf("Synchronous: %+v\n", ans)
+
+	<-ch // Synchronization receive
+}
+```
+
 ## HTTP API
 The base url is: https://api.botan.io/track
 
@@ -112,7 +148,7 @@ API response is a json document:
 
 * on success: {"status": "accepted"}
 * on failure: {"status": "failed"} or {"status": "bad request", "info": "some_additional_info_about_error"}
- 
+
 ##Contribution
 We are welcome any contributions as pull-requests!
 
